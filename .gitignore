@@ -11,14 +11,14 @@ __pycache__/
 venv/
 env/
 
-# Data and artefacts
-data/
-datasets/
-checkpoints/
-runs/
-logs/
-outputs/
-wandb/
+# Data and artefacts (anchored to repo root)
+/data/
+/datasets/
+/checkpoints/
+/runs/
+/logs/
+/outputs/
+/wandb/
 *.h5
 *.pt
 *.pth

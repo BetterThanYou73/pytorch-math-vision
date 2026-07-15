@@ -10,14 +10,18 @@ Early scaffold. Work happens on feature branches; `main` only accepts merged fea
 
 ## Class set
 
-Roughly 100 classes covering digits (0-9), letters (A-Z, a-z), and math punctuation
-(`+ - * / = ( ) [ ] { } . , : ; < > ? ! @ # $ % ^ & _ | ~`). Visually ambiguous case pairs
-(C/c, O/o, S/s, U/u, V/v, W/w, X/x, Z/z, K/k, P/p) are merged into a single class -
-you cannot tell them apart from a tight character crop, and pretending you can just
-poisons the labels.
+80 canonical classes:
 
-The canonical class list lives in `src/mathvision/data/classes.py` (added in the
-data-pipeline feature branch).
+- Digits: `0-9` (10)
+- Uppercase letters: `A-Z` (26)
+- Lowercase letters excluding merged case pairs: `a b d e f g h i j l m n q r t y` (16)
+- Punctuation and math: `! # $ % & ( ) * + , - . / : ; < = > ? @ [ ] ^ _ { | } ~` (28)
+
+The ten visually identical case pairs (`C/c O/o S/s U/u V/v W/w X/x Z/z K/k P/p`)
+are merged into their uppercase form. You cannot tell them apart from a tight
+character crop, and pretending you can just poisons the labels.
+
+Canonical list: `src/mathvision/data/classes.py`.
 
 ## Data sources
 
@@ -37,6 +41,20 @@ python -m venv .venv
 .venv\Scripts\activate       # Windows
 pip install -e ".[dev]"
 ```
+
+### Smoke test the data pipeline
+
+```
+python scripts/smoke_data.py --emnist-root data/emnist
+```
+
+Downloads EMNIST on first run, samples a batch from each source, and
+writes `outputs/smoke/data_grid.png` for visual verification.
+
+### Fonts
+
+The `fonts/` directory ships ~440 free .ttf files used by the on-the-fly
+synthetic renderer. Same set as the legacy repo.
 
 ## Roadmap
 
