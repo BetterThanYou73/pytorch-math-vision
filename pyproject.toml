@@ -25,8 +25,8 @@ dev = [
     "ruff>=0.5",
     "matplotlib>=3.8",
     "scikit-learn>=1.4",
-    "jupyter>=1.0",
 ]
+notebooks = ["jupyter>=1.0"]
 kaggle = ["kaggle>=1.6"]
 export = ["onnx>=1.16", "onnxruntime>=1.18"]
 

@@ -36,11 +36,41 @@ Canonical list: `src/mathvision/data/classes.py`.
 
 Requires Python 3.11 or 3.12.
 
+### GPU setup (CUDA)
+
+Install PyTorch from the CUDA wheel index **first**, before the project. This
+gives you CUDA-enabled `torch` instead of the CPU-only PyPI build. Pick the
+CUDA version that matches your GPU/driver — cu124 is a safe default for Ada
+Lovelace (RTX 40-series) and newer:
+
 ```
 python -m venv .venv
-.venv\Scripts\activate       # Windows
-pip install -e ".[dev]"
+.venv\Scripts\activate                                            # Windows
+python -m pip install --upgrade pip
+python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+python -m pip install -e ".[dev]"
 ```
+
+Verify GPU visibility:
+
+```
+python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+```
+
+### Windows setup gotchas
+
+- **SSL cert errors on `pip install`.** If pip fails with
+  `CERTIFICATE_VERIFY_FAILED`, install `truststore` with the trusted-host
+  bypass, then let pip use the Windows cert store from then on:
+  ```
+  python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org truststore
+  ```
+  pip 26+ uses truststore automatically once it is installed.
+- **Long path errors.** Some optional dependencies (e.g. `jupyter`) unpack
+  files that exceed the Windows 260-character path limit. That is why
+  `jupyter` lives under the `[notebooks]` extra rather than `[dev]`. If you
+  actually want notebooks, either enable Long Path Support in Windows or
+  install without extracting long-path files.
 
 ### Smoke test the data pipeline
 
