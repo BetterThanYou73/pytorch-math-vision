@@ -1,0 +1,30 @@
+# Tiny run for smoke testing the training loop end to end.
+# 2 epochs, 20 train batches and 5 val batches each, small synthetic set.
+# Real training uses configs/default.yaml.
+
+seed: 42
+image_size: 64
+
+sources:
+  - emnist
+  - synthetic
+emnist_root: data/emnist
+font_dir: fonts
+synthetic_samples_per_epoch: 2000
+
+batch_size: 128
+num_workers: 2
+epochs: 2
+
+lr: 3.0e-4
+weight_decay: 1.0e-4
+label_smoothing: 0.05
+grad_clip: 1.0
+
+checkpoint_dir: checkpoints
+runs_dir: runs
+run_name: smoke
+device: auto
+
+max_train_batches: 20
+max_val_batches: 5

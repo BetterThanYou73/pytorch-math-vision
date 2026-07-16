@@ -1,0 +1,30 @@
+# Default training config.
+# Override any field on the command line with --set key=value.
+
+seed: 42
+image_size: 64
+
+sources:
+  - emnist
+  - synthetic
+emnist_root: data/emnist
+font_dir: fonts
+synthetic_samples_per_epoch: 50000
+
+batch_size: 256
+num_workers: 4
+epochs: 30
+
+lr: 3.0e-4
+weight_decay: 1.0e-4
+label_smoothing: 0.05
+grad_clip: 1.0
+
+checkpoint_dir: checkpoints
+runs_dir: runs
+run_name: default
+device: auto
+
+# For quick smoke runs; null means "no limit".
+max_train_batches: null
+max_val_batches: null
