@@ -20,6 +20,7 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 from torch.utils.data import ConcatDataset, DataLoader, Dataset
+from tqdm.auto import tqdm
 
 from ..data import (
     NUM_CLASSES,
@@ -104,13 +105,23 @@ def _evaluate(
     criterion: nn.Module,
     device: torch.device,
     max_batches: int | None,
+    total_batches: int | None = None,
+    desc: str = "val",
 ) -> tuple[float, float]:
     model.eval()
     loss_sum = 0.0
     correct = 0
     total = 0
+    bar = tqdm(
+        _limited(loader, max_batches),
+        total=total_batches,
+        desc=desc,
+        unit="batch",
+        leave=False,
+        dynamic_ncols=True,
+    )
     with torch.no_grad():
-        for x, y in _limited(loader, max_batches):
+        for x, y in bar:
             x = x.to(device, non_blocking=True)
             y = y.to(device, non_blocking=True)
             logits = model(x)
@@ -118,6 +129,7 @@ def _evaluate(
             loss_sum += float(loss.item()) * y.size(0)
             correct += int((logits.argmax(dim=1) == y).sum().item())
             total += y.size(0)
+    bar.close()
     return loss_sum / max(total, 1), correct / max(total, 1)
 
 
@@ -179,6 +191,9 @@ def train(cfg: TrainConfig) -> Path:
     best_val_loss = float("inf")
     best_ckpt = ckpt_dir / "best.pt"
 
+    total_train_batches = cfg.max_train_batches or (len(train_ds) // cfg.batch_size)
+    total_val_batches = cfg.max_val_batches or ((len(val_ds) + cfg.batch_size - 1) // cfg.batch_size)
+
     for epoch in range(1, cfg.epochs + 1):
         model.train()
         epoch_loss = 0.0
@@ -186,7 +201,15 @@ def train(cfg: TrainConfig) -> Path:
         epoch_total = 0
         t0 = time.time()
 
-        for x, y in _limited(train_loader, cfg.max_train_batches):
+        train_bar = tqdm(
+            _limited(train_loader, cfg.max_train_batches),
+            total=total_train_batches,
+            desc=f"epoch {epoch:>3}/{cfg.epochs} train",
+            unit="batch",
+            leave=False,
+            dynamic_ncols=True,
+        )
+        for x, y in train_bar:
             x = x.to(device, non_blocking=True)
             y = y.to(device, non_blocking=True)
             optimizer.zero_grad(set_to_none=True)
@@ -207,15 +230,30 @@ def train(cfg: TrainConfig) -> Path:
                 optimizer.step()
 
             batch_size = y.size(0)
-            epoch_loss += float(loss.item()) * batch_size
-            epoch_correct += int((logits.argmax(dim=1) == y).sum().item())
+            loss_val = float(loss.item())
+            epoch_loss += loss_val * batch_size
+            batch_correct = int((logits.argmax(dim=1) == y).sum().item())
+            epoch_correct += batch_correct
             epoch_total += batch_size
+            train_bar.set_postfix(
+                loss=f"{epoch_loss / epoch_total:.3f}",
+                acc=f"{epoch_correct / epoch_total:.3f}",
+            )
+        train_bar.close()
 
         scheduler.step()
 
         train_loss = epoch_loss / max(epoch_total, 1)
         train_acc = epoch_correct / max(epoch_total, 1)
-        val_loss, val_acc = _evaluate(model, val_loader, criterion, device, cfg.max_val_batches)
+        val_loss, val_acc = _evaluate(
+            model,
+            val_loader,
+            criterion,
+            device,
+            cfg.max_val_batches,
+            total_batches=total_val_batches,
+            desc=f"epoch {epoch:>3}/{cfg.epochs} val",
+        )
         lr_now = scheduler.get_last_lr()[0]
         dt = time.time() - t0
 
