@@ -3,7 +3,7 @@
 Given a checkpoint and a dataset, computes top-1, top-3, macro F1, and
 per-class accuracy, and writes:
 - `report.md`: summary, worst/best 10 classes, top-20 confusion pairs
-- `confusion.png`: row-normalized 80x80 heatmap
+- `confusion.png`: row-normalized `NUM_CLASSES x NUM_CLASSES` heatmap
 - `confusion.npy`: raw confusion matrix for downstream analysis
 
 Read-only: nothing here touches training state.
