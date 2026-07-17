@@ -14,6 +14,7 @@ from pathlib import Path
 
 import torch
 
+from mathvision.data import NUM_CLASSES
 from mathvision.eval.report import build_report
 
 
@@ -56,7 +57,7 @@ def main() -> None:
         f"macro F1 (present {summary['n_classes_present']} classes): "
         f"{summary['macro_f1_present']:.4f}"
     )
-    print(f"macro F1 (all 80 classes):    {summary['macro_f1']:.4f}")
+    print(f"macro F1 (all {NUM_CLASSES} classes):    {summary['macro_f1']:.4f}")
     print()
     print("worst 10:")
     for c, a in summary["worst_10"]:
