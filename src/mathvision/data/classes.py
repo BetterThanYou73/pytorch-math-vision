@@ -8,7 +8,7 @@ resolve from a single-character crop.
 
 from __future__ import annotations
 
-CASE_MERGED = frozenset("CKOPSUVWXZ")
+CASE_MERGED = frozenset("CIJKLMOPSUVWXYZ")
 
 DIGITS = "0123456789"
 LETTERS_UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
